@@ -4,7 +4,7 @@
 declare( strict_types = 1 );
 
 
-namespace JDWX\Psr7\Utility;
+namespace JDWX\PsrHttp\Utility;
 
 
 use Psr\Http\Message\UploadedFileInterface;

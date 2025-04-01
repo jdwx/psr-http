@@ -4,11 +4,15 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\FileStream;
-use JDWX\Psr7\UploadedFile;
-use JDWX\Psr7\Utility\TempFile;
+namespace JDWX\PsrHttp\Tests;
+
+
+use JDWX\PsrHttp\FileStream;
+use JDWX\PsrHttp\UploadedFile;
+use JDWX\PsrHttp\Utility\TempFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 
 #[CoversClass( UploadedFile::class )]

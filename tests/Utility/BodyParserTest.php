@@ -4,12 +4,12 @@
 declare( strict_types = 1 );
 
 
-namespace Utility;
+namespace JDWX\PsrHttp\Tests\Utility;
 
 
 use InvalidArgumentException;
-use JDWX\Psr7\StringStream;
-use JDWX\Psr7\Utility\BodyParser;
+use JDWX\PsrHttp\StringStream;
+use JDWX\PsrHttp\Utility\BodyParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

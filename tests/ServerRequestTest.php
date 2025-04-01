@@ -4,8 +4,11 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\ServerRequest;
-use JDWX\Psr7\UploadedFile;
+namespace JDWX\PsrHttp\Tests;
+
+
+use JDWX\PsrHttp\ServerRequest;
+use JDWX\PsrHttp\UploadedFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

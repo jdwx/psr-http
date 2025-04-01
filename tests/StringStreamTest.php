@@ -4,9 +4,13 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\StringStream;
+namespace JDWX\PsrHttp\Tests;
+
+
+use JDWX\PsrHttp\StringStream;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 
 #[CoversClass( StringStream::class )]

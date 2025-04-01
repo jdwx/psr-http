@@ -4,7 +4,10 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\Response;
+namespace JDWX\PsrHttp\Tests;
+
+
+use JDWX\PsrHttp\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

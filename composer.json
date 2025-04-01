@@ -4,7 +4,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "JDWX\\Psr7\\": "src/"
+      "JDWX\\PsrHttp\\": "src/"
     }
   },
   "require": {

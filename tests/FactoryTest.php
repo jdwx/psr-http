@@ -4,15 +4,20 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\Factory;
-use JDWX\Psr7\StringStream;
-use JDWX\Psr7\Utility\TempFile;
+namespace JDWX\PsrHttp\Tests;
+
+
+use InvalidArgumentException;
+use JDWX\PsrHttp\Factory;
+use JDWX\PsrHttp\StringStream;
+use JDWX\PsrHttp\Utility\TempFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
 
 
 #[CoversClass( Factory::class )]

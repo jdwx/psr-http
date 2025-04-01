@@ -4,9 +4,14 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\FileStream;
+namespace JDWX\PsrHttp\Tests;
+
+
+use InvalidArgumentException;
+use JDWX\PsrHttp\FileStream;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 
 #[CoversClass( FileStream::class )]

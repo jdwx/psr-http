@@ -4,10 +4,10 @@
 declare( strict_types = 1 );
 
 
-namespace JDWX\Psr7;
+namespace JDWX\PsrHttp;
 
 
-use JDWX\Psr7\Utility\BodyParserFactory;
+use JDWX\PsrHttp\Utility\BodyParserFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;

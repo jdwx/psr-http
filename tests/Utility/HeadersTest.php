@@ -4,10 +4,10 @@
 declare( strict_types = 1 );
 
 
-namespace Utility;
+namespace JDWX\PsrHttp\Tests\Utility;
 
 
-use JDWX\Psr7\Utility\Headers;
+use JDWX\PsrHttp\Utility\Headers;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 

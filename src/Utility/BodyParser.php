@@ -4,11 +4,11 @@
 declare( strict_types = 1 );
 
 
-namespace JDWX\Psr7\Utility;
+namespace JDWX\PsrHttp\Utility;
 
 
-use JDWX\Psr7\Factory;
-use JDWX\Psr7\StringStream;
+use JDWX\PsrHttp\Factory;
+use JDWX\PsrHttp\StringStream;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UploadedFileInterface;

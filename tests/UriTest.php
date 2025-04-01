@@ -4,7 +4,11 @@
 declare( strict_types = 1 );
 
 
-use JDWX\Psr7\Uri;
+namespace JDWX\PsrHttp\Tests;
+
+
+use InvalidArgumentException;
+use JDWX\PsrHttp\Uri;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
