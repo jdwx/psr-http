@@ -14,6 +14,13 @@ use Psr\Http\Message\StreamInterface;
 class Response extends Message implements ResponseInterface {
 
 
+    /**
+     * @param StreamInterface|string $i_body
+     * @param string $i_stProtocolVersion
+     * @param array<string, list<string>> $i_rHeaders
+     * @param int $uStatusCode
+     * @param string $stReasonPhrase
+     */
     public function __construct( StreamInterface|string $i_body = '',
                                  string                 $i_stProtocolVersion = '1.1',
                                  array                  $i_rHeaders = [],

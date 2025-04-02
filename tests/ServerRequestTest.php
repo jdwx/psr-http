@@ -17,6 +17,51 @@ use PHPUnit\Framework\TestCase;
 final class ServerRequestTest extends TestCase {
 
 
+    public function testFromBodyForMultipart() : void {
+        $stBody = <<<EOT
+--BOUNDARY
+Content-Disposition: form-data; name="foo"
+
+bar
+--BOUNDARY
+Content-Disposition: form-data; name="baz"
+
+qux
+--BOUNDARY
+Content-Disposition: form-data; name="quux"; filename="test.txt"
+
+QUUX_CONTENT
+--BOUNDARY--
+EOT;
+        $rHeaders = [
+            'content-type' => [ 'multipart/form-data; boundary=BOUNDARY' ],
+        ];
+        $ssr = ServerRequest::fromBody( $stBody, i_rHeaders: $rHeaders );
+        $rParams = $ssr->getParsedBody();
+        assert( is_array( $rParams ) );
+        self::assertSame( 'bar', $rParams[ 'foo' ] );
+        self::assertSame( 'qux', $rParams[ 'baz' ] );
+        self::assertArrayNotHasKey( 'quux', $rParams );
+        $file = $ssr->getUploadedFiles()[ 'quux' ];
+        self::assertSame( "QUUX_CONTENT\n", $file->getStream()->__toString() );
+    }
+
+
+    public function testFromBodyForUrlEncoded() : void {
+        $stBody = 'foo=bar&baz=qux';
+        $rHeaders = [
+            'content-type' => [ 'application/x-www-form-urlencoded' ],
+        ];
+        $ssr = ServerRequest::fromBody( $stBody, i_rHeaders: $rHeaders );
+        $rParams = $ssr->getParsedBody();
+        assert( is_array( $rParams ) );
+        self::assertSame( 'bar', $rParams[ 'foo' ] );
+        self::assertSame( 'qux', $rParams[ 'baz' ] );
+        self::assertArrayNotHasKey( 'quux', $rParams );
+        self::assertEmpty( $ssr->getUploadedFiles() );
+    }
+
+
     public function testGetAttribute() : void {
         $ssr = new ServerRequest( rAttributes: [ 'foo' => 'bar' ] );
         self::assertSame( 'bar', $ssr->getAttribute( 'foo' ) );
@@ -38,15 +83,13 @@ final class ServerRequestTest extends TestCase {
 
 
     public function testGetParsedBody() : void {
-        $ssr = new ServerRequest();
-        $ssr->nrParsedBody = [ 'foo' => 'bar' ];
+        $ssr = new ServerRequest( xParsedBody: [ 'foo' => 'bar' ] );
         self::assertSame( [ 'foo' => 'bar' ], $ssr->getParsedBody() );
     }
 
 
     public function testGetQueryParams() : void {
-        $ssr = new ServerRequest();
-        $ssr->rQueryParams = [ 'foo' => 'bar' ];
+        $ssr = new ServerRequest( rQueryParams: [ 'foo' => 'bar' ] );
         self::assertSame( [ 'foo' => 'bar' ], $ssr->getQueryParams() );
     }
 
@@ -60,8 +103,7 @@ final class ServerRequestTest extends TestCase {
     public function testGetUploadedFiles() : void {
         $f1 = UploadedFile::fromString( 'TEST_CONTENT', i_nstClientFilename: 'foo.txt' );
         $f2 = UploadedFile::fromString( 'TEST_CONTENT', i_nstClientFilename: 'bar.txt' );
-        $ssr = new ServerRequest();
-        $ssr->nrUploadedFiles = [ 'foo' => $f1, 'bar' => $f2 ];
+        $ssr = new ServerRequest( rUploadedFiles: [ 'foo' => $f1, 'bar' => $f2 ] );
         $r = $ssr->getUploadedFiles();
         self::assertSame( 'foo.txt', $r[ 'foo' ]->getClientFilename() );
         self::assertSame( 'bar.txt', $r[ 'bar' ]->getClientFilename() );
@@ -85,9 +127,7 @@ final class ServerRequestTest extends TestCase {
 
 
     public function testWithParsedBody() : void {
-        $ssr = new ServerRequest();
-        self::assertNull( $ssr->getParsedBody() );
-        $ssr->nrParsedBody = [ 'foo' => 'bar' ];
+        $ssr = new ServerRequest( xParsedBody: [ 'foo' => 'bar' ] );
         $ssr2 = $ssr->withParsedBody( [ 'baz' => 'qux' ] );
         self::assertSame( [ 'baz' => 'qux' ], $ssr2->getParsedBody() );
         self::assertSame( [ 'foo' => 'bar' ], $ssr->getParsedBody() );
@@ -95,8 +135,7 @@ final class ServerRequestTest extends TestCase {
 
 
     public function testWithQueryParams() : void {
-        $ssr = new ServerRequest();
-        $ssr->rQueryParams = [ 'foo' => 'bar' ];
+        $ssr = new ServerRequest( rQueryParams: [ 'foo' => 'bar' ] );
         $ssr2 = $ssr->withQueryParams( [ 'baz' => [ 'qux', 'quux' ] ] );
         self::assertSame( [ 'baz' => [ 'qux', 'quux' ] ], $ssr2->getQueryParams() );
         self::assertSame( [ 'foo' => 'bar' ], $ssr->getQueryParams() );
@@ -109,12 +148,12 @@ final class ServerRequestTest extends TestCase {
         $f2 = UploadedFile::fromString( 'TEST_CONTENT' );
         $f2->nstClientFilename = 'bar';
         $ssr = new ServerRequest();
-        $ssr = $ssr->withUploadedFiles( [ $f1 ] );
-        self::assertSame( [ $f1 ], $ssr->getUploadedFiles() );
-        $ssr = $ssr->withUploadedFiles( [ $f2 ] );
-        self::assertSame( [ $f2 ], $ssr->getUploadedFiles() );
-        $ssr = $ssr->withUploadedFiles( [ $f1, $f2 ] );
-        self::assertSame( [ $f1, $f2 ], $ssr->getUploadedFiles() );
+        $ssr = $ssr->withUploadedFiles( [ 'foo' => $f1 ] );
+        self::assertSame( [ 'foo' => $f1 ], $ssr->getUploadedFiles() );
+        $ssr = $ssr->withUploadedFiles( [ 'bar' => $f2 ] );
+        self::assertSame( [ 'bar' => $f2 ], $ssr->getUploadedFiles() );
+        $ssr = $ssr->withUploadedFiles( [ 'foo' => $f1, 'bar' => $f2 ] );
+        self::assertSame( [ 'foo' => $f1, 'bar' => $f2 ], $ssr->getUploadedFiles() );
     }
 
 

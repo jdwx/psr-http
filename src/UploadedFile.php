@@ -27,6 +27,11 @@ class UploadedFile implements UploadedFileInterface {
                                  public bool    $i_bDeleteOnDestruct = false ) {}
 
 
+    /**
+     * @param string $i_stTag The name of the file input field.
+     * @param int|null $i_nuIndex The index of the file in the array (if applicable).
+     * @param array<string, mixed[]>|null $i_nrFiles The $_FILES array (if applicable).
+     */
     public static function fromFiles( string $i_stTag, ?int $i_nuIndex = null, ?array $i_nrFiles = null ) : ?static {
         $i_nrFiles ??= $_FILES;
         if ( ! isset( $i_nrFiles[ $i_stTag ] ) ) {
@@ -95,6 +100,10 @@ class UploadedFile implements UploadedFileInterface {
     }
 
 
+    /**
+     * @param array<string, array<int, string|int>> $i_rFile
+     * @return list<int|string|null>|null
+     */
     protected static function fromFilesMultiple( int $i_uIndex, array $i_rFile ) : ?array {
         if ( ! is_array( $i_rFile[ 'error' ] ) ) {
             # This is a single file upload, not multiple.
@@ -112,6 +121,10 @@ class UploadedFile implements UploadedFileInterface {
     }
 
 
+    /**
+     * @param array<string, string|int> $i_rFile
+     * @return list<int|string|null>|null
+     */
     protected static function fromFilesSingle( array $i_rFile ) : ?array {
         $nstClientFileName = $i_rFile[ 'name' ] ?? null;
         $nstType = $i_rFile[ 'type' ] ?? null;

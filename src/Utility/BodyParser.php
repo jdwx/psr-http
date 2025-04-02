@@ -48,11 +48,13 @@ class BodyParser implements BodyParserInterface {
     }
 
 
+    /** @return array<string, string|list<string>>|null */
     public function fetchBody() : array|null {
         return $this->nrParsedBody;
     }
 
 
+    /** @return array<string, string|list<string>> */
     public function fetchBodyArray() : array {
         if ( is_array( $this->nrParsedBody ) ) {
             return $this->nrParsedBody;
@@ -93,24 +95,23 @@ class BodyParser implements BodyParserInterface {
     protected function parseMultipartPart( string $stPart ) : void {
         # Each part contains one or more headers, followed by a blank line, followed by the body.
         # Lines are *supposed* to be terminated by CRLF, but some clients use LF only.
-        [ $rHeaders, $stBody ] = Headers::splitFromBodyAndParse( $stPart );
-        $stContentDisposition = $rHeaders[ 'content-disposition' ][ 0 ] ?? '';
+        [ $headers, $stBody ] = Headers::splitFromBodyAndParse( $stPart );
+        $stContentDisposition = $headers->getValue( 'content-disposition', 0 );
         if ( 'form-data' != $stContentDisposition ) {
             return;
         }
-        $stName = $rHeaders[ 'content-disposition' ][ 'name' ] ?? '';
+        $stName = $headers->getValue( 'content-disposition', 'name' );
         if ( '' === $stName ) {
             return;
         }
-        $bIsFile = isset( $rHeaders[ 'content-disposition' ][ 'filename' ] ) || isset( $rHeaders[ 'content-type' ] );
-        if ( ! $bIsFile ) {
+        if ( ! $headers->hasValue( 'content-disposition', 'filename' ) ) {
             $this->nrParsedBody[ $stName ] = trim( $stBody );
             return;
         }
         $this->rFiles[ $stName ] = $this->uploadedFileFactory->createUploadedFile(
             new StringStream( $stBody ),
-            clientFilename: $rHeaders[ 'content-disposition' ][ 'filename' ] ?? '',
-            clientMediaType: $rHeaders[ 'content-type' ][ 0 ] ?? '',
+            clientFilename: $headers->getValue( 'content-disposition', 'filename' ),
+            clientMediaType: $headers->getValue( 'content-type', 0, 'text/plain' ),
         );
     }
 

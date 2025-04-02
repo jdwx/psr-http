@@ -37,6 +37,7 @@ class Factory implements RequestFactoryInterface, ResponseFactoryInterface, UriF
     }
 
 
+    /** @param array<string, mixed> $serverParams */
     public function createServerRequest( string $method, $uri, array $serverParams = [] ) : ServerRequestInterface {
         return new ServerRequest( stMethod: $method, i_uri: $uri, rServerParams: $serverParams );
     }

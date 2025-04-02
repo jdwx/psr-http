@@ -37,6 +37,7 @@ readonly class Uri implements UriInterface, \Stringable {
     }
 
 
+    /** @param array<string, string|int>|string|UriInterface $i_uri */
     public static function from( array|string|UriInterface $i_uri ) : static {
         if ( is_string( $i_uri ) ) {
             return static::fromString( $i_uri );
@@ -48,6 +49,7 @@ readonly class Uri implements UriInterface, \Stringable {
     }
 
 
+    /** @param array<string, string|int> $i_rUri */
     public static function fromArray( array $i_rUri ) : static {
         $nuPort = $i_rUri[ 'port' ] ?? null;
         if ( is_string( $nuPort ) ) {

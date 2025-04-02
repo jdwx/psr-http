@@ -7,7 +7,15 @@ declare( strict_types = 1 );
 namespace JDWX\PsrHttp;
 
 
+use JDWX\PsrHttp\ServerRequest\LocalAttributeTrait;
+use JDWX\PsrHttp\ServerRequest\LocalCookieTrait;
+use JDWX\PsrHttp\ServerRequest\LocalFilesTrait;
+use JDWX\PsrHttp\ServerRequest\LocalParsedBodyTrait;
+use JDWX\PsrHttp\ServerRequest\LocalQueryTrait;
+use JDWX\PsrHttp\ServerRequest\LocalServerTrait;
 use JDWX\PsrHttp\Utility\BodyParserFactory;
+use JDWX\PsrHttp\Utility\BodyParserFactoryInterface;
+use JDWX\PsrHttp\Utility\Headers;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -17,82 +25,81 @@ use Psr\Http\Message\UriInterface;
 class ServerRequest extends Request implements ServerRequestInterface {
 
 
-    use ServerRequestCommonTrait;
+    use LocalAttributeTrait;
+
+    use LocalCookieTrait;
+
+    use LocalFilesTrait;
+
+    use LocalParsedBodyTrait;
+
+    use LocalQueryTrait;
+
+    use LocalServerTrait;
 
 
     /**
+     * @param StreamInterface|string $i_body
+     * @param string $i_stProtocolVersion
+     * @param array<string, list<string>> $i_rHeaders
+     * @param string $stMethod
+     * @param UriInterface|string|null $i_uri
+     * @param string|null $nstRequestTarget
      * @param array<string, string|list<string>> $rQueryParams
-     * @param ?array<string, UploadedFileInterface> $nrUploadedFiles
+     * @param array<int|string, UploadedFileInterface> $rUploadedFiles
      * @param array<string, string> $rCookieParams
      * @param array<string, mixed> $rAttributes
      * @param array<string, mixed> $rServerParams
-     * @param array<string, string|list<string>>|object|null $nrParsedBody
+     * @param array<string, string|list<string>>|object|null $xParsedBody
      */
     public function __construct( StreamInterface|string   $i_body = '', string $i_stProtocolVersion = '1.1',
                                  array                    $i_rHeaders = [], string $stMethod = 'GET',
                                  UriInterface|string|null $i_uri = null, ?string $nstRequestTarget = null,
-                                 public array             $rQueryParams = [],
-                                 public ?array            $nrUploadedFiles = null,
+                                 array                    $rQueryParams = [],
+                                 array                    $rUploadedFiles = [],
                                  array                    $rCookieParams = [],
                                  array                    $rAttributes = [],
                                  array                    $rServerParams = [],
-                                 public array|object|null $nrParsedBody = null ) {
+                                 array|object|null        $xParsedBody = null ) {
         parent::__construct( $i_body, $i_stProtocolVersion, $i_rHeaders, $stMethod, $i_uri, $nstRequestTarget );
-        $this->rCookieParams = $rCookieParams;
         $this->rAttributes = $rAttributes;
+        $this->rCookieParams = $rCookieParams;
+        $this->xParsedBody = $xParsedBody;
+        $this->rQueryParams = $rQueryParams;
         $this->rServerParams = $rServerParams;
-        if ( is_null( $this->nrParsedBody ) || is_null( $this->nrUploadedFiles ) ) {
-            $bodyParserFactory = new BodyParserFactory();
-            $bodyParser = $bodyParserFactory->createBodyParser(
-                $this->getBody(),
-                $this->getHeaderLine( 'Content-Type' )
-            );
-            if ( is_null( $this->nrParsedBody ) ) {
-                $this->nrParsedBody = $bodyParser->fetchBody();
-            }
-            if ( is_null( $this->nrUploadedFiles ) ) {
-                $this->nrUploadedFiles = $bodyParser->fetchFiles();
-            }
-        }
+        $this->rUploadedFiles = $rUploadedFiles;
     }
 
 
-    public function getParsedBody() : array|object|null {
-        return $this->nrParsedBody;
-    }
-
-
-    /** @return array<string, string|list<string>> */
-    public function getQueryParams() : array {
-        return $this->rQueryParams;
-    }
-
-
-    /** @return array<string, UploadedFileInterface> */
-    public function getUploadedFiles() : array {
-        return $this->nrUploadedFiles;
-    }
-
-
-    /** @param array|object|null $data */
-    public function withParsedBody( $data ) : static {
-        $x = clone $this;
-        $x->nrParsedBody = $data;
-        return $x;
-    }
-
-
-    public function withQueryParams( array $query ) : static {
-        $x = clone $this;
-        $x->rQueryParams = $query;
-        return $x;
-    }
-
-
-    public function withUploadedFiles( array $uploadedFiles ) : static {
-        $x = clone $this;
-        $x->nrUploadedFiles = $uploadedFiles;
-        return $x;
+    /**
+     * @param StreamInterface|string $i_body
+     * @param string $i_stProtocolVersion
+     * @param array<string, list<string>> $i_rHeaders
+     * @param string $stMethod
+     * @param UriInterface|string|null $i_uri
+     * @param string|null $nstRequestTarget
+     * @param array<string, string|list<string>> $rQueryParams
+     * @param array<string, string> $rCookieParams
+     * @param array<string, mixed> $rAttributes
+     * @param array<string, mixed> $rServerParams
+     * @param BodyParserFactoryInterface|null $i_bodyParserFactory
+     * @return self
+     */
+    public static function fromBody( StreamInterface|string      $i_body = '', string $i_stProtocolVersion = '1.1',
+                                     array                       $i_rHeaders = [], string $stMethod = 'GET',
+                                     UriInterface|string|null    $i_uri = null, ?string $nstRequestTarget = null,
+                                     array                       $rQueryParams = [],
+                                     array                       $rCookieParams = [],
+                                     array                       $rAttributes = [],
+                                     array                       $rServerParams = [],
+                                     ?BodyParserFactoryInterface $i_bodyParserFactory = null ) : self {
+        $i_bodyParserFactory ??= new BodyParserFactory();
+        $stContentType = Headers::getLine( $i_rHeaders, 'Content-Type' );
+        $bodyParser = $i_bodyParserFactory->createBodyParser( $i_body, $stContentType );
+        $nrParsedBody = $bodyParser->fetchBody();
+        $rUploadedFiles = $bodyParser->fetchFiles();
+        return new self( $i_body, $i_stProtocolVersion, $i_rHeaders, $stMethod, $i_uri, $nstRequestTarget,
+            $rQueryParams, $rUploadedFiles, $rCookieParams, $rAttributes, $rServerParams, $nrParsedBody );
     }
 
 

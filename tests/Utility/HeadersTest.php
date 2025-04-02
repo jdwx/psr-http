@@ -16,16 +16,31 @@ use PHPUnit\Framework\TestCase;
 final class HeadersTest extends TestCase {
 
 
-    public function testParse() : void {
-        $stHeaders = "Foo: bar\nBaz: qux; quux=\"corge grault\"\n";
-        $expected = [
-            'foo' => [ 0 => 'bar' ],
-            'baz' => [ 0 => 'qux', 'quux' => 'corge grault' ],
-        ];
-        self::assertSame( $expected, Headers::parse( $stHeaders ) );
+    public function testGet() : void {
+        self::assertSame( [ 'bar', 'baz' ], Headers::get( [ 'foo' => [ 'bar', 'baz' ] ], 'Foo' ) );
+    }
 
-        $stHeaders = "Foo: bar\r\nBaz: qux; quux=\"corge grault\"\r\n";
-        self::assertSame( $expected, Headers::parse( $stHeaders ) );
+
+    public function testGetLine() : void {
+        self::assertSame( 'bar', Headers::getLine( [ 'foo' => [ 'bar' ] ], 'Foo' ) );
+        self::assertSame( 'bar, baz', Headers::getLine( [
+            'foo' => [ 'bar', 'baz' ],
+        ], 'Foo' ) );
+        self::assertSame( '', Headers::getLine( [ 'foo' => [] ], 'Foo' ) );
+        self::assertSame( '', Headers::getLine( [], 'Foo' ) );
+    }
+
+
+    public function testParse() : void {
+        $stHeaders = "Foo: bar\nBaz: qux; quux=\"corge grault\"\nBaz: garply\n";
+        $expected = [
+            'foo' => [ 'bar' ],
+            'baz' => [ 'qux; quux="corge grault"', 'garply' ],
+        ];
+        self::assertSame( $expected, Headers::parse( $stHeaders )->getAll() );
+
+        $stHeaders = "Foo: bar\r\nBaz: qux; quux=\"corge grault\"\r\nBaz: garply\r\n";
+        self::assertSame( $expected, Headers::parse( $stHeaders )->getAll() );
     }
 
 
@@ -68,11 +83,11 @@ final class HeadersTest extends TestCase {
 
     public function testSplitFromBodyAndParse() : void {
         $stText = "Foo: bar\nBaz: qux; quux=\"corge grault\"\n\nGarply: the body!\n";
-        [ $rHeaders, $stBody ] = Headers::splitFromBodyAndParse( $stText );
+        [ $headers, $stBody ] = Headers::splitFromBodyAndParse( $stText );
         self::assertSame( [
-            'foo' => [ 0 => 'bar' ],
-            'baz' => [ 0 => 'qux', 'quux' => 'corge grault' ],
-        ], $rHeaders );
+            'foo' => [ 'bar' ],
+            'baz' => [ 'qux; quux="corge grault"' ],
+        ], $headers->getAll() );
         self::assertSame( "Garply: the body!\n", $stBody );
     }
 

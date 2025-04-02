@@ -21,69 +21,64 @@ final class RequestTest extends TestCase {
         $st = 'https://example.com/a/b?foo=1&bar=baz#qux';
         $uri = Uri::fromString( $st );
         $srq = new Request( i_uri: $uri );
-        self::assertSame( strval( $uri ), strval( $srq->uri ) );
+        self::assertSame( strval( $uri ), strval( $srq->getUri() ) );
     }
 
 
     public function testConstructForUriString() : void {
         $st = 'https://example.com/a/b?foo=1&bar=baz#qux';
         $srq = new Request( i_uri: $st );
-        self::assertSame( $st, strval( $srq->uri ) );
+        self::assertSame( $st, strval( $srq->getUri() ) );
     }
 
 
     public function testGetMethod() : void {
-        $request = new Request();
-        self::assertSame( 'GET', $request->getMethod() );
-
-        $request->stMethod = 'POST';
-        self::assertSame( 'POST', $request->getMethod() );
+        $req = new Request();
+        $req2 = $req->withMethod( 'POST' );
+        self::assertSame( 'GET', $req->getMethod() );
+        self::assertSame( 'POST', $req2->getMethod() );
     }
 
 
     public function testGetRequestTarget() : void {
-        $request = new Request();
-        self::assertSame( '/', $request->getRequestTarget() );
-
-        $request->uri = Uri::fromString( 'https://example.com/a/b?foo=1&bar=baz' );
-        self::assertSame( '/a/b?foo=1&bar=baz', $request->getRequestTarget() );
-
-        $request->nstRequestTarget = '/c/d';
-        self::assertSame( '/c/d', $request->getRequestTarget() );
+        $req = new Request();
+        $req2 = $req->withUri( Uri::fromString( 'https://example.com/a/b?foo=1&bar=baz' ) );
+        $req3 = $req2->withRequestTarget( '/c/d' );
+        self::assertSame( '/', $req->getRequestTarget() );
+        self::assertSame( '/a/b?foo=1&bar=baz', $req2->getRequestTarget() );
+        self::assertSame( '/c/d', $req3->getRequestTarget() );
     }
 
 
     public function testGetUri() : void {
-        $request = new Request();
-        self::assertSame( '/', $request->getUri()->getPath() );
-
-        $request->uri = Uri::fromString( 'https://example.com/a/b?foo=1&bar=baz' );
-        self::assertSame( '/a/b', $request->getUri()->getPath() );
+        $uri = Uri::fromString( 'https://example.com/a/b?foo=1&bar=baz#qux' );
+        $request = new Request( i_uri: $uri );
+        self::assertSame( strval( $uri ), strval( $request->getUri() ) );
     }
 
 
     public function testWithMethod() : void {
         $req = new Request();
-        self::assertSame( 'GET', $req->stMethod );
-        $req = $req->withMethod( 'POST' );
-        self::assertSame( 'POST', $req->stMethod );
+        $req2 = $req->withMethod( 'POST' );
+        self::assertSame( 'GET', $req->getMethod() );
+        self::assertSame( 'POST', $req2->getMethod() );
     }
 
 
     public function testWithRequestTarget() : void {
         $req = new Request();
-        self::assertNull( $req->nstRequestTarget );
-        $req = $req->withRequestTarget( '/a/b' );
-        self::assertSame( '/a/b', $req->nstRequestTarget );
+        $req2 = $req->withRequestTarget( '/a/b' );
+        self::assertSame( '/', $req->getRequestTarget() );
+        self::assertSame( '/a/b', $req2->getRequestTarget() );
     }
 
 
     public function testWithUri() : void {
         $req = new Request();
-        self::assertNull( $req->uri );
         $uri = Uri::fromString( 'https://example.com/a/b?foo=1&bar=baz#qux' );
-        $req = $req->withUri( $uri );
-        self::assertSame( strval( $uri ), strval( $req->uri ) );
+        $req2 = $req->withUri( $uri );
+        self::assertSame( '/', strval( $req->getUri() ) );
+        self::assertSame( strval( $uri ), strval( $req2->getUri() ) );
     }
 
 

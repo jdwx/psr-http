@@ -13,6 +13,7 @@ use Psr\Http\Message\UploadedFileInterface;
 interface BodyParserInterface {
 
 
+    /** @return array<string, string|list<string>>|object|null */
     public function fetchBody() : array|object|null;
 
 

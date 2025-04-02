@@ -36,6 +36,7 @@ class TempFile implements \Stringable {
     }
 
 
+    /** @return resource */
     public function fopen( string $i_stMode ) {
         /** @noinspection PhpUsageOfSilenceOperatorInspection */
         $bf = @fopen( $this->stFilename, $i_stMode );

@@ -23,6 +23,8 @@ This module requires PHP 8.3 or later.
 
 This module doesn't really do much on its own. It provides simple implementations of the PSR HTTP interfaces, which can be useful for testing or for providing a base implementation that can be extended by other modules.
 
+The implementations provided for MessageInterface, RequestInterface, and ServerRequest interface are composed entirely of traits that implement each property individually so that you can grab anything you need for your own implementation.
+
 ## Stability
 
 This module is designed to stick as closely as possible to the PSR HTTP interfaces, so it should be fairly stable. Additional functionality may be somewhat more likely to evolve over time as more use cases are encountered.
