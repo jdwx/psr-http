@@ -9,7 +9,6 @@ namespace JDWX\PsrHttp\Tests;
 
 use JDWX\PsrHttp\FileStream;
 use JDWX\PsrHttp\UploadedFile;
-use JDWX\PsrHttp\Utility\TempFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -17,84 +16,6 @@ use RuntimeException;
 
 #[CoversClass( UploadedFile::class )]
 final class UploadedFileTest extends TestCase {
-
-
-    public function testFromFilesForMissingFile() : void {
-        $rFiles = [
-            'file0' => [
-                'name' => 'test.txt',
-                'type' => 'text/plain',
-                'tmp_name' => '/no/such/file',
-            ],
-        ];
-        self::assertNull( UploadedFile::fromFiles( 'file0', null, $rFiles ) );
-    }
-
-
-    public function testFromFilesForMissingName() : void {
-        $rFiles = [
-            'file0' => [
-                'error' => UPLOAD_ERR_OK,
-                'type' => 'text/plain',
-                'tmp_name' => '/no/such/file',
-            ],
-        ];
-        self::assertNull( UploadedFile::fromFiles( 'file0', null, $rFiles ) );
-    }
-
-
-    public function testFromFilesForMissingTag() : void {
-        $rFiles = [ 'file0' => [] ];
-        self::assertNull( UploadedFile::fromFiles( 'file1', null, $rFiles ) );
-    }
-
-
-    public function testFromFilesForMultiple() : void {
-        $tmp1 = new TempFile( 'TEST_FILE_1' );
-        $tmp2 = new TempFile( 'TEST_FILE_2' );
-        $rFiles = [
-            'file' => [
-                'name' => [
-                    0 => 'test1.txt',
-                    1 => 'test2.txt',
-                ],
-                'error' => [
-                    0 => UPLOAD_ERR_OK,
-                    1 => UPLOAD_ERR_OK,
-                ],
-                'type' => [
-                    0 => 'text/plain',
-                    1 => 'text/plain',
-                ],
-                'tmp_name' => [
-                    0 => strval( $tmp1 ),
-                    1 => strval( $tmp2 ),
-                ],
-            ],
-        ];
-        self::assertNull( UploadedFile::fromFiles( 'file1', null, $rFiles ) );
-        $file1 = UploadedFile::fromFiles( 'file', 0, $rFiles );
-        self::assertSame( 'TEST_FILE_1', $file1->getStream()->getContents() );
-        $file2 = UploadedFile::fromFiles( 'file', 1, $rFiles );
-        self::assertSame( 'TEST_FILE_2', $file2->getStream()->getContents() );
-        self::assertNull( UploadedFile::fromFiles( 'file', 2, $rFiles ) );
-    }
-
-
-    public function testFromFilesForSingle() : void {
-        $stContent = 'TEST_CONTENT';
-        $tmp = new TempFile( $stContent );
-        $rFiles = [ 'file0' => [
-            'name' => 'test.txt',
-            'error' => UPLOAD_ERR_OK,
-            'type' => 'text/plain',
-            'tmp_name' => strval( $tmp ),
-        ], ];
-        $file = UploadedFile::fromFiles( 'file0', null, $rFiles );
-        self::assertSame( $stContent, $file->getStream()->getContents() );
-        self::assertNull( UploadedFile::fromFiles( 'file1', null, $rFiles ) );
-        self::assertNull( UploadedFile::fromFiles( 'file0', 0, $rFiles ) );
-    }
 
 
     public function testFromStream() : void {
@@ -131,7 +52,6 @@ final class UploadedFileTest extends TestCase {
     public function testGetSize() : void {
         $stContent = 'TEST_CONTENT';
         $file = UploadedFile::fromString( 'TEST_CONTENT' );
-        $file->stBody = $stContent;
         self::assertSame( strlen( $stContent ), $file->getSize() );
     }
 
@@ -149,7 +69,6 @@ final class UploadedFileTest extends TestCase {
     public function testMoveTo() : void {
         $stContent = 'TEST_CONTENT';
         $file = UploadedFile::fromString( 'TEST_CONTENT' );
-        $file->stBody = $stContent;
         $stFileName = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid( '', true ) . '.txt';
         /** @noinspection PhpUsageOfSilenceOperatorInspection */
         @unlink( $stFileName );
@@ -165,8 +84,7 @@ final class UploadedFileTest extends TestCase {
 
     public function testMoveToForWriteError() : void {
         $stContent = 'TEST_CONTENT';
-        $file = UploadedFile::fromString( 'TEST_CONTENT' );
-        $file->stBody = $stContent;
+        $file = UploadedFile::fromString( $stContent );
         $stFileName = '/no/such/file';
         /** @noinspection PhpUsageOfSilenceOperatorInspection */
         self::expectException( RuntimeException::class );
